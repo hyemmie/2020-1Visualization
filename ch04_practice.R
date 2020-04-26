@@ -20,7 +20,7 @@ colnames(df) <- c("sido","name","y2018","y2019","value1","value2")
 #      ex) 3.29% -> 3.29
 #-----------------------------------------------------------------------
 as.numeric(str_remove(df$value1, "%"))
-#____
+#_______mutate활용
 df <- df %>%
     mutate(value1= as.numeric(str_remove(value1,"%")))
 df$value1 <- as.numeric(str_remove(value1,"%"))
