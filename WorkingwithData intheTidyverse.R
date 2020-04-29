@@ -178,3 +178,138 @@ viewers_7day <- ratings %>%
            -ends_with("28day"))
 # Glimpse
 glimpse(viewers_7day)
+
+#3.Tidy your data
+
+# Adapt code to plot episode 2 viewers by series
+ggplot(ratings, aes(x = series, y = e2)) +
+    geom_col()
+
+
+tidy_ratings <- ratings %>%
+# Gather and convert episode to factor
+	gather(key = "episode", value = "viewers_7day", -series, 
+           factor_key = TRUE, na.rm = TRUE) %>%
+# Sort in ascending order by series and episode
+    arrange(series, episode) %>% 
+# Create new variable using row_number()
+    mutate(episode_count = row_number())
+# Plot viewers by episode and series
+ggplot(tidy_ratings, aes(x = episode_count, y = viewers_7day, 
+                fill = series)) +
+    geom_col()
+
+week_ratings <- ratings2 %>% 
+	# Select 7-day viewer ratings
+    select(series, ends_with("7day")) %>%
+	# Gather 7-day viewers by episode
+	  gather(key="episode", value = "viewers_7day", -series, factor_key=TRUE, na.rm=TRUE)
+
+
+week_ratings <- ratings2  %>% 
+	# Select 7-day viewer ratings
+    select(series, ends_with("7day")) %>% 
+	# Gather 7-day viewers by episode
+
+# Plot 7-day viewers by episode and series
+ggplot(week_ratings, aes(x = episode, 
+                y = viewers_7day, 
+                group = series)) +
+    geom_line() +
+    facet_wrap(~series)
+
+# Create week_ratings
+week_ratings <- ratings2 %>% 
+    select(series, ends_with("7day")) %>% 
+    gather(episode, viewers_7day, ends_with("7day"), 
+           na.rm = TRUE) %>% 
+    separate(episode, into = "episode", extra = "drop") %>% 
+    mutate(episode = parse_number(episode))
+    
+# Edit your code to color by series and add a theme
+ggplot(week_ratings, aes(x = episode, y = viewers_7day, 
+                         group = series, color = series)) +
+    geom_line() +
+    facet_wrap(~series) +
+    guides(color = FALSE) +
+    theme_minimal()
+
+
+ratings3 <- ratings2  %>% 
+# Unite and change the separator
+	unite(viewers_7day, viewers_millions, viewers_decimal, sep = "") %>%
+# Adapt to cast viewers as a number
+	mutate(viewers_7day = parse_number(viewers_7day))
+# Print to view
+ratings3
+
+
+# Create tidy data with 7- and 28-day viewers
+tidy_ratings_all <- ratings2 %>%
+    gather(episode, viewers, ends_with("day"), na.rm = TRUE) %>% 
+    separate(episode, into = c("episode", "days")) %>%  
+    mutate(episode = parse_number(episode),
+           days = parse_number(days)) 
+tidy_ratings_all %>% 
+	# Count viewers by series and days
+    count(series, days, wt = viewers) %>%
+	# Adapt to spread counted values
+	spread(key = days,value= n, sep="_")
+
+
+# Fill in blanks to get premiere/finale data
+tidy_ratings <- ratings %>%
+    gather(episode, viewers, -series, na.rm = TRUE) %>%
+    mutate(episode = parse_number(episode)) %>% 
+    group_by(series) %>% 
+    filter(episode == 1 | episode == max(episode)) %>% 
+    ungroup()
+
+# Recode first/last episodes
+first_last <- tidy_ratings %>% 
+  mutate(episode = recode(episode, `1` = "first", .default = "last")) 
+# Fill in to make slope chart
+ggplot(first_last, aes(x = episode, y = viewers, color = series)) +
+  geom_point() +
+   geom_line(aes(group = series))
+# Switch the variables mapping x-axis and color
+ggplot(first_last, aes(x = series, y = viewers, color = episode)) +
+  geom_point() + # keep
+  geom_line(aes(group = series)) + # keep
+  coord_flip() # keep
+
+# Fill in to make bar chart of bumps by series
+ggplot(bump_by_series, aes(x = series, y = bump)) +
+  geom_col() +
+  scale_y_continuous(labels = scales::percent) # converts to %
+
+  # Create skill variable with 3 levels
+bakers_skill <- bakers %>% 
+  mutate(skill = case_when(
+    star_baker > technical_winner ~ "super_star",
+    star_baker < technical_winner ~ "high_tech",
+    TRUE ~ "well_rounded"
+  ))
+  
+# Filter zeroes to examine skill variable
+bakers_skill %>% 
+  filter(star_baker==0 & technical_winner==0) %>% 
+  count(skill)
+
+# Add pipe to drop skill = NA
+bakers_skill <- bakers %>% 
+  mutate(skill = case_when(
+    star_baker > technical_winner ~ "super_star",
+    star_baker < technical_winner ~ "high_tech",
+    star_baker == 0 & technical_winner == 0 ~ NA_character_,
+    star_baker == technical_winner  ~ "well_rounded"
+  )) %>% 
+  drop_na(skill)  
+# Count bakers by skill
+bakers_skill %>% count(skill)
+
+# Cast skill as a factor
+bakers <- bakers %>% 
+  mutate(skill = as.factor(skill))
+# Examine levels
+bakers %>% dplyr::pull(skill) %>% levels()
