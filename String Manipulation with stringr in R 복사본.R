@@ -1,1 +1,0 @@
-# Data Visualization with ggplot2 (Part 1)
