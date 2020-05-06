@@ -581,7 +581,44 @@ str_replace_all(contact, DGT, c("X", ".", "*", "_"))
 
 
 
+# Build pattern to match words ending in "ING"
+pattern <- one_or_more(WRD) %R% "ING"  
+str_view(narratives, pattern)
+# Test replacement
+str_replace(narratives, capture(pattern), str_c("CARELESSLY", REF1, sep = " "))
+# One adverb per narrative
+adverbs_10 <- sample(adverbs,10)
+# Replace "***ing" with "adverb ***ly"
+str_replace(narratives, capture(pattern), str_c(adverbs_10, REF1, sep = " "))
 
+
+
+# Names with builtin accents
+(tay_son_builtin <- c(
+  "Nguy\u1ec5n Nh\u1ea1c", 
+  "Nguy\u1ec5n Hu\u1ec7",
+  "Nguy\u1ec5n Quang To\u1ea3n"
+))
+# Convert to separate accents
+tay_son_separate <- stri_trans_nfd(tay_son_builtin)
+# Verify that the string prints the same
+tay_son_separate
+# Match all accents
+str_view_all(tay_son_separate, UP_DIACRITIC)
+
+
+
+# tay_son_separate has been pre-defined
+tay_son_separate
+# View all the characters in tay_son_separate
+str_view_all(tay_son_separate, pattern=ANY_CHAR)
+# View all the graphemes in tay_son_separate
+str_view_all(tay_son_separate, pattern=GRAPHEME)
+# Combine the diacritics with their letters
+tay_son_builtin <- stri_trans_nfc(tay_son_separate)
+tay_son_builtin
+# View all the graphemes in tay_son_builtin
+str_view_all(tay_son_builtin, GRAPHEME)
 
 
 
