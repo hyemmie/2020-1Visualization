@@ -497,4 +497,115 @@ time_units_clean <- str_extract(time_units, pattern=WRD)
 # Turn ages in months to years
 ifelse(time_units_clean == "Y", ages_numeric, ages_numeric/12)
 
+# 4.More advanced matching and manipulation
+
+# Pattern from previous step
+email <- capture(one_or_more(WRD)) %R% 
+  "@" %R% capture(one_or_more(WRD)) %R% 
+  DOT %R% capture(one_or_more(WRD))  
+# Pull out match and captures
+email_parts <- str_match(hero_contacts, pattern=email)
+email_parts
+# Save host
+host <- email_parts[,3]
+host
+
+
+
+# View text containing phone numbers
+contact
+# Add capture() to get digit parts
+phone_pattern <- capture(three_digits) %R% zero_or_more(separator) %R% 
+           capture(three_digits) %R% zero_or_more(separator) %R%
+           capture(four_digits)
+           
+# Pull out the parts with str_match()
+phone_numbers <- str_match(contact,pattern=phone_pattern)
+# Put them back together
+str_c(
+  "(",
+  phone_numbers[,2],
+  ")",
+  phone_numbers[,3],
+  "-",
+  phone_numbers[,4])
+
+
+
+# narratives has been pre-defined
+narratives
+# Add capture() to get age, unit and sex
+pattern <- capture(optional(DGT) %R% DGT) %R%  
+  optional(SPC) %R% capture(or("YO", "YR", "MO")) %R%
+  optional(SPC) %R% capture(or("M", "F"))
+# Pull out from narratives
+str_match(narratives, pattern=pattern)
+# Edit to capture just Y and M in units
+pattern2 <- capture(optional(DGT) %R% DGT) %R%  
+  optional(SPC) %R% capture(or("Y", "M")) %R% optional(or("O","R")) %R%
+  optional(SPC) %R% capture(or("M", "F"))
+# Check pattern
+str_view(narratives,pattern=pattern2)
+# Pull out pieces
+str_match(narratives,pattern=pattern2)
+
+
+
+# Names with three repeated letters
+repeated_three_times <- capture(ANY_CHAR) %R% REF1 %R% REF1
+# Test it
+str_view(boy_names, pattern = repeated_three_times, match = TRUE)
+# Names with a pair of repeated letters
+pair_of_repeated <- capture(ANY_CHAR%R%ANY_CHAR) %R% REF1
+# Test it
+str_view(boy_names, pattern = pair_of_repeated, match = TRUE)
+# Names with a pair that reverses
+pair_that_reverses <- capture(ANY_CHAR) %R% capture(ANY_CHAR) %R% REF2 %R% REF1
+# Test it
+str_view(boy_names, pattern = pair_that_reverses, match = TRUE)
+# Four letter palindrome names
+four_letter_palindrome <- exactly(capture(ANY_CHAR) %R% capture(ANY_CHAR) %R% REF2 %R% REF1)
+# Test it
+str_view(boy_names, pattern = four_letter_palindrome, match = TRUE)
+
+
+
+# View text containing phone numbers
+contact
+# Replace digits with "X"
+str_replace(contact, DGT, "X")
+# Replace all digits with "X"
+str_replace_all(contact, DGT, "X")
+# Replace all digits with different symbol
+str_replace_all(contact, DGT, c("X", ".", "*", "_"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
