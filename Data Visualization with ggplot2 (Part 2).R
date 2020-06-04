@@ -189,7 +189,7 @@ wt.cyl.am +
                position = posn.d, size = 3,
                col = "black", shape = "X")
 
-#2 Coordinates and Facets
+# 2. Coordinates and Facets
 
 # Basic ggplot() command, coded for you
 p <- ggplot(mtcars, aes(x = wt, y = hp, col = am)) + geom_point() + geom_smooth()
@@ -281,14 +281,173 @@ p +
 p +
   facet_grid(vore ~ ., scale= "free_y", space = "free_y")
 
+# 3. Themes
+
+# Starting point
+z
+# Plot 1: Change the plot background fill to myPink
+z +
+  theme(plot.background = element_rect(fill = myPink))
+# Plot 2: Adjust the border to be a black line of size 3
+z +
+  theme(plot.background = element_rect(fill = myPink,color="black",size=3)) # expanded from plot 1
+# Theme to remove all rectangles
+no_panels <- theme(rect = element_blank())
+# Plot 3: Combine custom themes
+z +
+  no_panels +
+  theme(plot.background = element_rect(fill = myPink,color="black",size=3)) # from plot 2
 
 
 
+# Extend z using theme() function and 3 args
+z +
+  theme(panel.grid=element_blank(),axis.line=element_line(color="red"),axis.ticks=element_line(color="red"))
 
 
 
+# Original plot, color provided
+z
+myRed
+# Extend z with theme() function and 3 args
+z +
+  theme(strip.text = element_text(size = 16, color = myRed),
+        axis.title = element_text(color = myRed, hjust = 0, face = "italic"),
+        axis.text = element_text(color = "black"))
 
 
+
+# Move legend by position
+z +
+  theme(legend.position = c(0.85,0.85))
+# Change direction
+z +
+  theme(legend.direction = "horizontal")
+# Change location by name
+z +
+  theme(legend.position = "bottom")
+# Remove legend entirely
+z +
+  theme(legend.position = "none")
+
+
+
+# Increase spacing between facets
+library(grid)
+z +
+  theme(panel.spacing.x = unit(2,"cm"))
+# Adjust the plot margin
+library(grid)
+z +
+  theme(panel.spacing.x = unit(2,"cm"),plot.margin=unit(c(1,2,1,1),"cm"))
+
+
+
+# Original plot
+z2
+# Theme layer saved as an object, theme_pink
+theme_pink <- theme(panel.background = element_blank(),
+                    legend.key = element_blank(),
+                    legend.background = element_blank(),
+                    strip.background = element_blank(),
+                    plot.background = element_rect(fill = myPink, color = "black", size = 3),
+                    panel.grid = element_blank(),
+                    axis.line = element_line(color = "red"),
+                    axis.ticks = element_line(color = "red"),
+                    strip.text = element_text(size = 16, color = myRed),
+                    axis.title.y = element_text(color = myRed, hjust = 0, face = "italic"),
+                    axis.title.x = element_text(color = myRed, hjust = 0, face = "italic"),
+                    axis.text = element_text(color = "black"),
+                    legend.position = "none")
+# 1 - Apply theme_pink to z2
+z2 +
+  theme_pink
+# 2 - Update the default theme, and at the same time
+# assign the old theme to the object old.
+old <- theme_update(panel.background = element_blank(),
+             legend.key = element_blank(),
+             legend.background = element_blank(),
+             strip.background = element_blank(),
+             plot.background = element_rect(fill = myPink, color = "black", size = 3),
+             panel.grid = element_blank(),
+             axis.line = element_line(color = "red"),
+             axis.ticks = element_line(color = "red"),
+             strip.text = element_text(size = 16, color = myRed),
+             axis.title.y = element_text(color = myRed, hjust = 0, face = "italic"),
+             axis.title.x = element_text(color = myRed, hjust = 0, face = "italic"),
+             axis.text = element_text(color = "black"),
+             legend.position = "none")
+# 3 - Display the plot z2 - new default theme used
+z2
+# 4 - Restore the old default theme
+theme_set(old)
+# Display the plot z2 - old theme restored
+z2 + theme_set(old)
+
+
+
+# Original plot
+z2
+# Load ggthemes
+library(ggthemes)
+# Apply theme_tufte(), plot additional modifications
+custom_theme <- theme_tufte() +
+  theme(legend.position = c(0.9, 0.9),
+        legend.title = element_text(face="italic",size=12),
+        axis.title = element_text(face="bold",size=14))
+# Draw the customized plot
+z2 + custom_theme
+# Use theme set to set custom theme as default
+theme_set(custom_theme)
+# Plot z2 again
+z2
+
+# 4. Best Practices
+
+# Base layers
+m <- ggplot(mtcars, aes(x = cyl, y = wt))
+# Draw dynamite plot
+m +
+  stat_summary(fun.y = mean, geom = "bar", fill = "skyblue") +
+  stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1), geom = "errorbar", width = 0.1)
+
+
+
+# Base layers
+m <- ggplot(mtcars, aes(x = cyl,y = wt, col = am, fill = am))
+# Plot 1: Draw dynamite plot
+m +
+  stat_summary(fun.y = mean, geom = "bar") +
+  stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1), geom = "errorbar", width = 0.1)
+# Plot 2: Set position dodge in each stat function
+m +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1), 
+               geom = "errorbar", width = 0.1, position = "dodge")
+# Set your dodge posn manually
+posn.d <- position_dodge(0.9)
+# Plot 3: Redraw dynamite plot
+m +
+  stat_summary(fun.y = mean, geom = "bar", position = posn.d) +
+  stat_summary(fun.data = mean_sdl, fun.args = list(mult = 1), geom = "errorbar", width = 0.1, position = posn.d)
+
+
+
+# Base layers
+m <- ggplot(mtcars.cyl, aes(x = cyl, y = wt.avg))
+# Plot 1: Draw bar plot with geom_bar
+m + geom_bar(stat = "identity", fill = "skyblue")
+# Plot 2: Draw bar plot with geom_col
+m + geom_col(fill = "skyblue")
+# Plot 3: geom_col with variable widths.
+m + geom_col(fill = "skyblue", width = mtcars.cyl$prop)
+
+# Plot 4: Add error bars
+m + 
+  geom_col(fill = "skyblue", width = mtcars.cyl$prop) +
+  geom_errorbar(aes(ymin = wt.avg-sd, ymax = wt.avg + sd), width = 0.1)
+
+  
 
 
 
